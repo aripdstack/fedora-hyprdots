@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+active="$(nmcli -t -e no -f TYPE,NAME connection show --active 2>/dev/null | awk -F: '$1=="vpn" || $1=="wireguard" {sub(/^[^:]*:/, ""); print; exit}')"
+profiles="$(nmcli -t -e no -f TYPE,NAME connection show 2>/dev/null | awk -F: '$1=="vpn" || $1=="wireguard" {sub(/^[^:]*:/, ""); print}')"
+menu=""
+if [[ -n "$active" ]]; then
+  menu+="󰌊 Disconnect: $active"$'\n'
+fi
+while IFS= read -r profile; do
+  [[ -n "$profile" ]] && menu+="󰌆 $profile"$'\n'
+done <<< "$profiles"
+if [[ -z "$menu" ]]; then
+  notify-send "VPN" "Tidak ada profil VPN tersimpan. Klik kanan ikon VPN untuk membuat/mengedit profil."
+  exit 0
+fi
+choice="$(printf '%s' "$menu" | sed '/^$/d' | rofi -dmenu -i -p "VPN")"
+[[ -z "$choice" ]] && exit 0
+if [[ "$choice" == "󰌊 Disconnect: "* ]]; then
+  name="${choice#󰌊 Disconnect: }"
+  nmcli connection down "$name" >/dev/null 2>&1 && notify-send "VPN" "Disconnected: $name"
+else
+  name="${choice#󰌆 }"
+  if nmcli connection up "$name" >/dev/null 2>&1; then
+    notify-send "VPN" "Connected: $name"
+  else
+    notify-send -u critical "VPN" "Gagal connect: $name"
+  fi
+fi

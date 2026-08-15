@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+# =================================================
+# Fedora 44 startup for yurihikari/garuda-hyprdots
+# =================================================
+
+# Prevent duplicate instances
+pkill -x waybar 2>/dev/null || true
+pkill -x mako 2>/dev/null || true
+
+sleep 1
+
+
+# -------------------------------------------------
+# PolicyKit
+# -------------------------------------------------
+
+if [[ -x /usr/libexec/lxqt-policykit-agent ]]; then
+    if ! pgrep -f /usr/libexec/lxqt-policykit-agent >/dev/null 2>&1; then
+        /usr/libexec/lxqt-policykit-agent &
+    fi
+fi
+
+
+# -------------------------------------------------
+# GNOME Keyring
+# -------------------------------------------------
+
+if command -v gnome-keyring-daemon >/dev/null 2>&1; then
+    if ! pgrep -f gnome-keyring-daemon >/dev/null 2>&1; then
+        gnome-keyring-daemon \
+            --start \
+            --components=secrets,ssh,pkcs11 \
+            >/dev/null 2>&1 &
+    fi
+fi
+
+
+# -------------------------------------------------
+# Wallpaper
+# -------------------------------------------------
+
+if command -v swww-daemon >/dev/null 2>&1; then
+    if ! pgrep -x swww-daemon >/dev/null 2>&1; then
+# swww-daemon disabled - using hyprpaper
+        sleep 1
+    fi
+fi
+
+
+# -------------------------------------------------
+# Notifications
+# -------------------------------------------------
+
+if command -v mako >/dev/null 2>&1; then
+    ~/.config/hypr/scripts/notifications &
+fi
+
+
+# -------------------------------------------------
+# Waybar
+# -------------------------------------------------
+
+if command -v waybar >/dev/null 2>&1; then
+    ~/.config/hypr/scripts/statusbar &
+fi
+
+
+# -------------------------------------------------
+# NetworkManager Applet
+# -------------------------------------------------
+
+if command -v nm-applet >/dev/null 2>&1; then
+    if ! pgrep -x nm-applet >/dev/null 2>&1; then
+        nm-applet --indicator &
+    fi
+fi
+
+
+# -------------------------------------------------
+# MPD
+# -------------------------------------------------
+
+if command -v mpd >/dev/null 2>&1; then
+    if ! pgrep -x mpd >/dev/null 2>&1; then
+        mpd &
+    fi
+fi
+
+# Active media player for Waybar MPRIS
+if command -v playerctld >/dev/null 2>&1 && ! pgrep -x playerctld >/dev/null; then
+    playerctld daemon &
+fi
+
+exit 0

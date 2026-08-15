@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+vpn="$(nmcli -t -e no -f TYPE,NAME connection show --active 2>/dev/null | awk -F: '$1=="vpn" || $1=="wireguard" {sub(/^[^:]*:/, ""); print; exit}')"
+if [[ -n "$vpn" ]]; then
+  safe="${vpn//\\/\\\\}"
+  safe="${safe//\"/\\\"}"
+  echo "{\"text\":\"󰌆\",\"tooltip\":\"VPN: $safe\",\"class\":\"connected\"}"
+else
+  echo '{"text":"󰦝","tooltip":"VPN tidak aktif","class":"disconnected"}'
+fi

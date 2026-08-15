@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+BACKGROUND_DIR="$HOME/.config/backgrounds"
+CURRENT="$HOME/.config/hypr/env/.current_background"
+
+mkdir -p "$BACKGROUND_DIR"
+mkdir -p "$(dirname "$CURRENT")"
+
+SELECTED="$(
+    find "$BACKGROUND_DIR" -maxdepth 1 -type f \
+        \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+        -printf "%f\n" |
+    sort |
+    rofi -dmenu -i -p "Pilih Wallpaper"
+)"
+
+[[ -z "$SELECTED" ]] && exit 0
+
+WALLPAPER="$BACKGROUND_DIR/$SELECTED"
+
+if ! pgrep -x swww-daemon >/dev/null; then
+    swww-daemon &
+    sleep 1
+fi
+
+swww img "$WALLPAPER" \
+    --transition-type fade \
+    --transition-duration 1 \
+    --transition-fps 60
+
+echo "$WALLPAPER" > "$CURRENT"
+
+notify-send "Wallpaper" "$SELECTED"
+

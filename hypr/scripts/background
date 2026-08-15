@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+DIR="$HOME/.config/backgrounds"
+CURRENT="$HOME/.config/hypr/env/.current_background"
+
+mkdir -p "$DIR"
+mkdir -p "$(dirname "$CURRENT")"
+
+SELECTED="$(
+    find "$DIR" -maxdepth 1 -type f \
+        \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+        -printf "%f\n" |
+    sort |
+    rofi -dmenu -i -p "Wallpaper"
+)"
+
+[[ -z "$SELECTED" ]] && exit 0
+
+WALLPAPER="$DIR/$SELECTED"
+
+hyprctl hyprpaper wallpaper ", $WALLPAPER, cover"
+
+echo "$WALLPAPER" > "$CURRENT"
+
+notify-send "Wallpaper" "$SELECTED"
+

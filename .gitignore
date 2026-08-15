@@ -1,0 +1,38 @@
+# Backup
+*.bak
+*.bak-*
+*.backup
+*.backup-*
+*.before-*
+*.stable-*
+*.failed-*
+*.candidate
+
+# Migration
+migration-*
+waybar-backup-*
+
+# Runtime/cache
+.cache/
+*.log
+*.pid
+*.tmp
+*.swp
+*~
+
+# Generated state
+hypr/env/.current_background
+
+# Secrets / keys
+*.key
+*.pem
+*.p12
+*.pfx
+*.ovpn
+*.conf.secret
+credentials*
+secrets*
+
+# Git
+.DS_Store
+Thumbs.db
